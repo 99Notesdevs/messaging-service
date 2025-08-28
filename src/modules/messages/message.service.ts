@@ -1,20 +1,5 @@
 import { Message, IMessage } from "./message.model";
-
-export const sendMessage = async (data: {
-  conversationId: string;
-  senderId: string;
-  receiverId: string;
-  content: string;
-}): Promise<IMessage> => {
-  const message = new Message(data);
-  return await message.save();
-};
-
-export const getConversationMessages = async (
-  conversationId: string
-): Promise<IMessage[]> => {
-  return await Message.find({ conversationId }).sort({ createdAt: 1 }).exec();
-};
+import { Conversation } from "../conversation/conversation.model";
 
 // Save message and return saved doc
 export async function saveMessage(data: {
@@ -31,7 +16,14 @@ export async function saveMessage(data: {
     createdAt: new Date(),
     status: "SENT",
   });
-  return await msg.save();
+  const message = await msg.save();
+  await Conversation.findByIdAndUpdate(data.conversationId, {
+    $set: {
+      lastMessage: message._id
+    },
+  });
+  
+  return message;
 }
 
 // List messages with simple cursor pagination (cursor = ISO date string)

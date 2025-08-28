@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package Authenticate;
+
+service AuthService {
+  rpc GetAuthToken (GetAuthTokenRequest) returns (AuthTokenResponse);
+}
+
+message GetAuthTokenRequest {
+  string token = 1;
+}
+
+message AuthTokenResponse {
+  int32 id = 1;
+  string type = 2;
+}

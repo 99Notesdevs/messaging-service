@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package User;
+
+service UserService {
+  rpc GetUserRating (UserRatingRequest) returns (UserRatingResponse);
+  rpc UpdateUserRating (UpdateUserRatingRequest) returns (UpdateUserRatingResponse);
+}
+
+message UserRatingRequest {
+  int32 userId = 1;
+}
+
+message UserRatingResponse {
+  double rating = 1;
+}
+
+message UpdateUserRatingRequest {
+  int32 userId = 1;
+  int32 rating = 2;
+}
+
+message UpdateUserRatingResponse {
+  bool success = 1;
+}

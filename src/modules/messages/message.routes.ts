@@ -1,9 +1,9 @@
-import { Router } from "express";
-import { sendMessage, getMessages } from "./message.controller";
+// import { Router } from "express";
+// import { sendMessage, getMessages } from "./message.controller";
 
-const router = Router();
+// const router = Router();
 
-router.post("/", sendMessage);
-router.get("/:conversationId", getMessages);
+// router.post("/", sendMessage);
+// router.get("/:conversationId", getMessages);
 
-export default router;
+// export default router;

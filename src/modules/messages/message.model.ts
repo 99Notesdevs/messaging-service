@@ -10,7 +10,7 @@ export interface IMessage extends Document {
 }
 
 const MessageSchema: Schema = new Schema({
-  conversationId: { type: String, required: true, index: true },
+  conversationId: { type: Schema.Types.ObjectId, ref: "Conversation", required: true, index: true },
   senderId: { type: String, required: true },
   receiverId: { type: String, required: true },
   content: { type: String, required: true },

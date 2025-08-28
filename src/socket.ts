@@ -5,6 +5,7 @@ import Redis from "ioredis";
 import jwt from "jsonwebtoken";
 
 import { saveMessage, listMessagesForConversation, markMessageRead } from "./modules/messages/message.service";
+import { ConversationService } from "./modules/conversation/conversation.service";
 
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 const JWT_SECRET = process.env.JWT_SECRET || "vansh123";
@@ -26,7 +27,7 @@ export async function createSocketServer(expressApp: any) {
     const token = (socket.handshake.auth && socket.handshake.auth.token) || socket.handshake.query?.token;
     if (!token) return next(new Error("auth error"));
     try {
-      const { id } = jwt.verify(String(token), JWT_SECRET) as { id: number };
+      const { id } = jwt.verify(String(token), JWT_SECRET) as { id: string };
       (socket as any).userId = id;
       return next();
     } catch (err) {
@@ -56,9 +57,14 @@ export async function createSocketServer(expressApp: any) {
     // Send a message: save to DB, emit to recipient's personal room
     socket.on("SEND_MESSAGE", async (data, ack) => {
       try {
-        const { conversationId, toUserId, content } = data;
+        const { toUserId, content } = data;
         const senderId = userId;
-        const saved = await saveMessage({ conversationId, senderId, receiverId: toUserId, content });
+        const conversation = await ConversationService.findOrCreateConversation(senderId, toUserId);
+        const saved = await saveMessage({ conversationId: conversation.id, senderId, receiverId: toUserId, content });
+
+        io.to(`user:${senderId}`).emit("CONVERSATION_UPDATED", { conversationId: conversation.id, lastMessage: saved });
+        io.to(`user:${toUserId}`).emit("CONVERSATION_UPDATED", { conversationId: conversation.id, lastMessage: saved });
+
 
         // emit NEW_MESSAGE to recipient's personal room
         const payload = { type: "NEW_MESSAGE", message: saved };
@@ -67,7 +73,11 @@ export async function createSocketServer(expressApp: any) {
         // ack to sender
         if (ack) ack({ ok: true, message: saved });
       } catch (err) {
-        if (ack) ack({ ok: false, error: String(err) });
+        if (ack)
+          ack({
+            ok: false,
+            error: err instanceof Error ? err.message : String(err),
+          });
       }
     });
 
@@ -75,12 +85,14 @@ export async function createSocketServer(expressApp: any) {
     socket.on("MARK_READ", async (data, ack) => {
       try {
         const { messageId } = data;
-        await markMessageRead(messageId, userId);
+        const msg = await markMessageRead(messageId, userId);
 
-        // notify sender that their message is read
-        const payload = { type: "MESSAGE_READ", messageId, readerId: userId };
         // (notify the sender via their personal room)
-        io.to(`user:${(data as any).senderId}`).emit("MESSAGE_READ", payload);
+        io.to(`user:${msg.senderId}`).emit("MESSAGE_READ", {
+          type: "MESSAGE_READ",
+          messageId,
+          readerId: userId,
+        });
 
         if (ack) ack({ ok: true });
       } catch (err) {

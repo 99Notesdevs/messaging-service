@@ -1,11 +1,13 @@
 import express from "express";
 import cors from "cors";
-import messageRoutes from "./modules/messages/message.routes";
+// import messageRoutes from "./modules/messages/message.routes";
+import conversationRoutes from "./modules/conversation/conversation.routes";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use("/api/messages", messageRoutes);
+// app.use("/api/messages", messageRoutes);
+app.use("/api/conversations", conversationRoutes);
 
 app.get("/healthz", (_req, res) => res.json({ ok: true }));
 
