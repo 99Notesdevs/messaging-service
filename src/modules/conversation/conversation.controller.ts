@@ -1,6 +1,15 @@
 import { Request, Response } from "express";
 import { ConversationService } from "./conversation.service";
 
+declare global {
+  namespace Express {
+    interface Request {
+      authUser?: string;
+      authType?: string;
+    }
+  }
+}
+
 export const createConversation = async (req: Request, res: Response) => {
   try {
     const { receiverId } = req.body;
