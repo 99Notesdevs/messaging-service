@@ -17,6 +17,7 @@ const secret = process.env.TOKEN_SECRET || '';
 
 export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        console.log("This is the one", req.cookies);
         const cookie = req.cookies['token'];
         if (!cookie) throw new Error('No Cookie provided');
         const token = cookie.trim();
