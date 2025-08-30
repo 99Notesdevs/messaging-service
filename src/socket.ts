@@ -3,6 +3,7 @@ import { Server as IOServer, Socket } from "socket.io";
 import { createAdapter } from "@socket.io/redis-adapter";
 import Redis from "ioredis";
 import jwt from "jsonwebtoken";
+import cookie from "cookie";
 
 import { saveMessage, listMessagesForConversation, markMessageRead } from "./modules/messages/message.service";
 import { ConversationService } from "./modules/conversation/conversation.service";
@@ -24,7 +25,15 @@ export async function createSocketServer(expressApp: any) {
 
   // Simple JWT auth middleware for socket.io
   io.use((socket, next) => {
-    const token = (socket.handshake.auth && socket.handshake.auth.token) || socket.handshake.query?.token;
+    let token =
+      (socket.handshake.auth && socket.handshake.auth.token) ||
+      socket.handshake.query?.token;
+
+    // If not provided, try to read from cookies
+    if (!token && socket.handshake.headers.cookie) {
+      const cookies = cookie.parse(socket.handshake.headers.cookie);
+      token = cookies.token;
+    }
     if (!token) return next(new Error("auth error"));
     try {
       const { id } = jwt.verify(String(token), JWT_SECRET) as { id: string };
