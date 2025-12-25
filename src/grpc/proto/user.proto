@@ -5,6 +5,8 @@ package User;
 service UserService {
   rpc GetUserRating (UserRatingRequest) returns (UserRatingResponse);
   rpc UpdateUserRating (UpdateUserRatingRequest) returns (UpdateUserRatingResponse);
+  rpc GetUsersDetails (UsersDetailsRequest) returns (UsersDetailsResponse);
+
 }
 
 message UserRatingRequest {
@@ -22,4 +24,19 @@ message UpdateUserRatingRequest {
 
 message UpdateUserRatingResponse {
   bool success = 1;
+}
+
+message UsersDetailsRequest {
+  repeated int32 ids = 1;
+}
+
+message UsersDetailsResponse {
+  repeated UserDetails users = 1;
+}
+
+message UserDetails {
+  int32  userId    = 1;
+  string firstName = 2;
+  string lastName  = 3;
+  double rating    = 4;
 }

@@ -45,6 +45,15 @@ export const getUserRating = async (
   });
 };
 
+export const getUserDetails = async (ids: number[]): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    userClient.GetUsersDetails({ ids }, (error: any, response: any) => {
+      if (error) reject(error);
+      else resolve(response);
+    });
+  });
+};
+
 export const updateUserRating = async (
   userId: number,
   rating: number

@@ -30,12 +30,12 @@ export async function createSocketServer(expressApp: any) {
       socket.handshake.query?.token;
 
     // If not provided, try to read from cookies
-    if (!token && socket.handshake.headers.cookie) {
-      const cookies = cookie.parse(socket.handshake.headers.cookie);
-      token = cookies.token;
-    }
-    if (!token) return next(new Error("auth error"));
     try {
+      if (!token && socket.handshake.headers.cookie) {
+        const cookies = cookie.parse(socket.handshake.headers.cookie);
+        token = cookies.token;
+      }
+      if (!token) return next(new Error("auth error"));
       const { id } = jwt.verify(String(token), JWT_SECRET) as { id: string };
       (socket as any).userId = id;
       return next();
