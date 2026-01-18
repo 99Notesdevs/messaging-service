@@ -8,7 +8,7 @@ RUN npm ci --omit=dev --ignore-scripts || npm install --omit=dev --ignore-script
 # Copy pre-compiled dist folder
 COPY dist ./dist
 
-# Copy proto files from src to dist (where the app expects them)
+# Copy proto files from src to dist
 COPY src/grpc/proto ./dist/grpc/proto
 
 COPY . .
